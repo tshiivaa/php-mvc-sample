@@ -1,10 +1,5 @@
 <?php
-/**
- * HelloController
- * Says hello to a person.
- *
- * @author Damien Walsh <me@damow.net>
- */
+
 class HelloController
 {
     /**
@@ -20,11 +15,14 @@ class HelloController
      */
     public function helloAction($params)
     {
-        // Find the requested person in the database
+        require_once 'connexion.php';
+        $db = config::connexion();
+        if (!$db) {
+            die("Erreur de connexion");
+        }
         $person = Person::findByColumn('id', $params[1]);
-
-        // Render the helloView view
         include 'view/helloView.php';
     }
 }
 
+?>

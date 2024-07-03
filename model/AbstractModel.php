@@ -1,17 +1,5 @@
 <?php
-/**
- * AbstractModel Class
- * A generic representation of a database table.
- *
- * For now, the database tables used are stored in the model
- * classes themselves. This could be modified to access a
- * "real" database, for example MySQL or SQLite.
- *
- * Model classes (E.g. Person) inherit this class so that
- * instances can be pulled out from the database.
- *
- * @author Damien Walsh <me@damow.net>
- */
+
 abstract class AbstractModel
 {
     /**
@@ -31,24 +19,27 @@ abstract class AbstractModel
      */
     public static function findByColumn($column, $value)
     {
-        // Find the row in the database
-        foreach (static::$data as $row) {
+        $table = static::$table;
+        $db = config::connexion();
 
-            // If this is the row...
-            if ($row[$column] == $value) {
-
-                // Create a new instance of the actual class
-                $instance = new static;
-
-                // Hydrate the instance with the row contents
-                foreach ($row as $key => $value) {
-                    $instance->{$key} = $value;
-                }
-
-                // Return the new instance
-                return $instance;
-            }
+        if (!$db) {
+            die("Erreur de connexion à la base de données.");
         }
+
+        $stmt = $db->prepare("SELECT * FROM $table WHERE $column = :value");
+        $stmt->bindParam(':value', $value);
+        $stmt->execute();
+
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row) {
+            $instance = new static;
+            foreach ($row as $key => $value) {
+                $instance->{$key} = $value;
+            }
+            return $instance;
+        }
+
         return false;
     }
 
@@ -63,18 +54,29 @@ abstract class AbstractModel
      *      $johnny->fav_colour = 'Orange';
      *      $johnny->persist();
      *
-     * This would update the data stored in the Person class.
-     * Normally, this would generate an SQL query to persist
-     * a row back to the database table it came from.
+     * This would update the data stored in the database table.
      */
     public function persist()
     {
-        foreach (static::$data as & $row) {
-            if ($row['id'] == $this->id) {
-                foreach ($this as $key => $value) {
-                    $row[$key] = $value;
-                }
-            }
+        $table = static::$table;
+        $db = config::connexion();
+
+        if (!$db) {
+            die("Erreur de connexion à la base de données.");
         }
+        $properties = get_object_vars($this);
+        $setClause = [];
+        foreach ($properties as $key => $value) {
+            $setClause[] = "$key = :$key";
+        }
+        $setClause = implode(', ', $setClause);
+
+        $stmt = $db->prepare("UPDATE $table SET $setClause WHERE id = :id");
+        foreach ($properties as $key => $value) {
+            $stmt->bindValue(":$key", $value);
+        }
+        $stmt->execute();
     }
 }
+
+?>
