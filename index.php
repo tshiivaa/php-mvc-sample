@@ -9,6 +9,7 @@
  * @author Damien Walsh <me@damow.net>
  */
 require_once 'vendor/autoload.php';
+require_once 'controller/HelloController.php';
 
 // Define the routes table
 $routes = array(
@@ -31,3 +32,32 @@ foreach ($routes as $url => $action) {
         break;
     }
 }
+$controller = new HelloController();
+
+/*$action = isset($_GET['action']) ? $_GET['action'] : 'list';
+$id = isset($_GET['id']) ? $_GET['id'] : null;*/
+
+switch ($action) {
+    case 'add':
+        $controller->add();
+        break;
+    /*case 'edit':
+        if ($id) {
+            $controller->edit($id);
+        } else {
+            echo "ID is required for editing.";
+        }
+        break;*/
+    /* case 'delete':
+         if ($id) {
+             $controller->delete($id);
+         } else {
+             echo "ID is required for deletion.";
+         }
+         break;*/
+    /* case 'list':
+     default:
+         $controller->list();
+         break;*/
+}
+

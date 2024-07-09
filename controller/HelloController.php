@@ -2,6 +2,49 @@
 
 class HelloController
 {
+    private $model;
+
+    public function __construct()
+    {
+        $this->model = new Person();
+    }
+
+    public function add()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $data = [
+                'name' => $_POST['name'],
+                'fav_colour' => $_POST['fav_colour']
+            ];
+            $this->model->add($data);
+            header('Location: index.php?action=list');
+        } 
+    }
+
+    public function edit($id)
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $data = [
+                'name' => $_POST['name'],
+                'fav_colour' => $_POST['fav_colour']
+            ];
+            $this->model->edit($data, $id);
+            header('Location: index.php?action=list');
+        } 
+    }
+
+    public function delete($id)
+    {
+        $this->model->delete($id);
+        header('Location: index.php?action=list');
+    }
+
+  /*  public function list()
+    {
+        $persons = $this->model->list();
+        include 'view/listPersons.php';
+    }*/
+
     /**
      * Say hello to a person.
      * $params will be an array of parameters passed by the Front Controller.
@@ -23,6 +66,7 @@ class HelloController
         $person = Person::findByColumn('id', $params[1]);
         include 'view/helloView.php';
     }
+
 }
 
-?>
+
